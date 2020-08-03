@@ -265,6 +265,7 @@ stdenv.mkDerivation {
     ##
     + optionalString (isClang && libcxx == null && !(stdenv.targetPlatform.useLLVM or false) && gccForLibs != null) ''
 
+      echo "--gcc-toolchain=${gccForLibs}" >> $out/nix-support/cc-cflags
       echo "-B${gccForLibs}/lib/gcc/${targetPlatform.config}/${gccForLibs.version}" >> $out/nix-support/cc-cflags
       echo "-L${gccForLibs}/lib/gcc/${targetPlatform.config}/${gccForLibs.version}" >> $out/nix-support/cc-ldflags
       echo "-L${gccForLibs.lib}/${targetPlatform.config}/lib" >> $out/nix-support/cc-ldflags
