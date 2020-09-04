@@ -4,7 +4,7 @@ stdenv.mkDerivation rec {
   pname = "lowdown";
   version = "0.7.4";
 
-  outputs = [ "out" "dev" ];
+  outputs = [ "out" "bin" "dev" "man" ];
 
   src = fetchurl {
     url = "https://kristaps.bsd.lv/lowdown/snapshots/lowdown-${version}.tar.gz";
@@ -16,8 +16,11 @@ stdenv.mkDerivation rec {
   configurePhase = ''
     ./configure PREFIX=''${!outputDev} \
                 BINDIR=''${!outputBin}/bin \
-                MANDIR=''${!outputBin}/share/man
+                LIBDIR=''${!outputLib}/lib \
+                MANDIR=''${!outputMan}/share/man
   '';
+
+  patches = stdenv.lib.optional (!stdenv.hostPlatform.isStatic) ./shared.patch;
 
   meta = with stdenv.lib; {
     homepage = "https://kristaps.bsd.lv/lowdown/";
