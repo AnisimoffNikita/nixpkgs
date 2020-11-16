@@ -9,24 +9,31 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "nym";
-  version = "0.7.0";
+  version = "0.8.1";
 
   src = fetchFromGitHub {
     owner = "nymtech";
     repo = "nym";
     rev = "v${version}";
-    sha256 = "05bxrpqwwf9spydac0q8sly65q8f1nk13i5fy3p5adr1phzxdnr8";
+    sha256 = "0wzk9qzjyax73lfjbbag412vw1fgk2wmhhry5hdlvdbkim42m5bn";
   };
 
-  cargoSha256 = "0mh8cwia86bm68b0wcrmnsq1af5cp6kj1j81nwxb03awnqpxc34n";
+  # fix outdated Cargo.lock
+  cargoPatches = [ (writeText "fix-nym-cargo-lock.patch" ''
+    --- a/Cargo.lock
+    +++ b/Cargo.lock
+    @@ -1826 +1826 @@
+    -version = "0.8.0"
+    +version = "0.8.1"
+  '') ];
+
+  cargoSha256 = "0zr5nzmglmvn6xfqgvipbzy8nw5cl3nf7zjmghkqdwi6zj9p9272";
 
   nativeBuildInputs = [ pkgconfig ];
 
   buildInputs = [ openssl ];
 
-  # tests disabled until a release with https://github.com/nymtech/nym/pull/260 is available
-  doCheck = false;
-
+  checkType = "debug";
 
   passthru.updateScript = ./update.sh;
 

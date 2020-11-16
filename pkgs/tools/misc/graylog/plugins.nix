@@ -32,7 +32,7 @@ in {
     };
     meta = {
       homepage = "https://github.com/cvtienhoven/graylog-plugin-aggregates";
-      description = "SSO support for Graylog through trusted HTTP headers set by load balancers or authentication proxies";
+      description = "A plugin that enables users to execute term searches and get notified when the given criteria are met";
     };
   };
   auth_sso = glPlugin rec {
@@ -64,10 +64,10 @@ in {
   enterprise-integrations = glPlugin rec {
     name = "graylog-enterprise-integrations-${version}";
     pluginName = "graylog-plugin-enterprise-integrations";
-    version = "3.3.0";
+    version = "3.3.8";
     src = fetchurl {
       url = "https://downloads.graylog.org/releases/graylog-enterprise-integrations/graylog-enterprise-integrations-plugins-${version}.tgz";
-      sha256 = "1480ccii3nzvm0jp1xm2iddgc789zcwbgd19201q7p3v0ph02yj8";
+      sha256 = "1567q2pwgcwxvaa0qmbhgvnr9f9v3w7vgvnv8kvfvjhxlvm78g1q";
     };
     installPhase = ''
       mkdir -p $out/bin
@@ -75,7 +75,7 @@ in {
       cp ${pluginName}-${version}.jar $out/bin/${pluginName}-${version}.jar
     '';
     meta = {
-      homepage = "https://docs.graylog.org/en/3.2/pages/integrations.html#enterprise";
+      homepage = "https://docs.graylog.org/en/3.3/pages/integrations.html#enterprise";
       description = "Integrations are tools that help Graylog work with external systems (unfree enterprise integrations)";
       license = stdenv.lib.licenses.unfree;
     };
@@ -96,10 +96,10 @@ in {
   integrations = glPlugin rec {
     name = "graylog-integrations-${version}";
     pluginName = "graylog-plugin-integrations";
-    version = "3.3.0";
+    version = "3.3.8";
     src = fetchurl {
       url = "https://downloads.graylog.org/releases/graylog-integrations/graylog-integrations-plugins-${version}.tgz";
-      sha256 = "08cpxviwk2p4zsgbr2h3symr88rf3fjfz1kkg4iglvdc5mqf71xx";
+      sha256 = "00ax3r24inzicak0dd77737qpfas455w5vmj980yfsz40vwnqlr2";
     };
     installPhase = ''
       mkdir -p $out/bin

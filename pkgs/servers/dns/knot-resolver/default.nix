@@ -16,11 +16,11 @@ lua = luajitPackages;
 
 unwrapped = stdenv.mkDerivation rec {
   pname = "knot-resolver";
-  version = "5.1.1";
+  version = "5.2.0";
 
   src = fetchurl {
     url = "https://secure.nic.cz/files/knot-resolver/${pname}-${version}.tar.xz";
-    sha256 = "f72214046df8aae2b1a5c6d1ad0bc8b166aa060df5b008f6e88b4f6ba79cbf4e";
+    sha256 = "8824267ca3331fa06d418c1351b68c648da0af121bcbc84c6e08f5b1e28d9433";
   };
 
   outputs = [ "out" "dev" ];
@@ -67,6 +67,7 @@ unwrapped = stdenv.mkDerivation rec {
   postInstall = ''
     rm "$out"/lib/libkres.a
     rm "$out"/lib/knot-resolver/upgrade-4-to-5.lua # not meaningful on NixOS
+    rm -r "$out"/lib/sysusers.d/ # ATM more likely to harm than help
   '';
 
   doInstallCheck = with stdenv; hostPlatform == buildPlatform;

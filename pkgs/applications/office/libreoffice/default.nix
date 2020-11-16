@@ -6,17 +6,18 @@
 , openssl, gperf, cppunit, poppler, utillinux
 , librsvg, libGLU, libGL, bsh, CoinMP, libwps, libabw, libmysqlclient
 , autoconf, automake, openldap, bash, hunspell, librdf_redland, nss, nspr
-, libwpg, dbus-glib, clucene_core, libcdr, lcms, vigra
+, libwpg, dbus-glib, clucene_core, libcdr, lcms
 , unixODBC, mdds, sane-backends, mythes, libexttextcat, libvisio
 , fontsConf, pkgconfig, bluez5, libtool, carlito
 , libatomic_ops, graphite2, harfbuzz, libodfgen, libzmf
-, librevenge, libe-book, libmwaw, glm, glew, gst_all_1
+, librevenge, libe-book, libmwaw, glm, gst_all_1
 , gdb, commonsLogging, librdf_rasqal, wrapGAppsHook
 , gnome3, glib, ncurses, epoxy, gpgme
-, langs ? [ "ca" "cs" "de" "en-GB" "en-US" "eo" "es" "fr" "hu" "it" "ja" "nl" "pl" "pt" "pt-BR" "ru" "sl" "zh-CN" ]
+, langs ? [ "ca" "cs" "da" "de" "en-GB" "en-US" "eo" "es" "fr" "hu" "it" "ja" "nl" "pl" "pt" "pt-BR" "ro" "ru" "sl" "zh-CN" ]
 , withHelp ? true
 , kdeIntegration ? false, mkDerivation ? null, qtbase ? null, qtx11extras ? null
 , ki18n ? null, kconfig ? null, kcoreaddons ? null, kio ? null, kwindowsystem ? null
+, wrapQtAppsHook ? null
 , variant ? "fresh"
 } @ args:
 
@@ -61,15 +62,12 @@ in (mkDrv rec {
   # of rasqal/rasqal.h
   NIX_CFLAGS_COMPILE = [
     "-I${librdf_rasqal}/include/rasqal"
-  ] ++ lib.optional stdenv.isx86_64 "-mno-fma";
+  ] ++ lib.optionals stdenv.isx86_64 [ "-mno-fma" "-mno-avx" ]
+  # https://bugs.documentfoundation.org/show_bug.cgi?id=78174#c10
+  ++ [ "-fno-visibility-inlines-hidden" ];
 
   patches = [
     ./xdg-open-brief.patch
-    (fetchpatch {
-      url = "https://git.pld-linux.org/gitweb.cgi?p=packages/libreoffice.git;a=blob_plain;f=poppler-0.86.patch;h=76b8356d5f22ef537a83b0f9b0debab591f152fe;hb=a2737a61353e305a9ee69640fb20d4582c218008";
-      name = "poppler-0.86.patch";
-      sha256 = "0q6k4l8imgp8ailcv0qx5l83afyw44hah24fi7gjrm9xgv5sbb8j";
-    })
   ];
 
   tarballPath = "external/tarballs";
@@ -306,7 +304,14 @@ in (mkDrv rec {
 
     mkdir -p $dev
     cp -r include $dev
+  '' + lib.optionalString kdeIntegration ''
+      for prog in $out/bin/*
+      do
+        wrapQtApp $prog
+      done
   '';
+
+  dontWrapQtApps = true;
 
   configureFlags = [
     (if withHelp then "" else "--without-help")
@@ -385,7 +390,8 @@ in (mkDrv rec {
 
   nativeBuildInputs = [
     gdb fontforge autoconf automake bison pkgconfig libtool
-  ] ++ lib.optional (!kdeIntegration) wrapGAppsHook;
+  ] ++ lib.optional (!kdeIntegration) wrapGAppsHook
+    ++ lib.optional kdeIntegration wrapQtAppsHook;
 
   buildInputs = with xorg;
     [ ant ArchiveZip boost cairo clucene_core
@@ -397,10 +403,10 @@ in (mkDrv rec {
       libXdmcp libpthreadstubs libGLU libGL mythes
       glib libmysqlclient
       neon nspr nss openldap openssl pam perl pkgconfig poppler
-      python3 sane-backends unzip vigra which zip zlib
+      python3 sane-backends unzip which zip zlib
       mdds bluez5 libcmis libwps libabw libzmf
       libxshmfence libatomic_ops graphite2 harfbuzz gpgme utillinux
-      librevenge libe-book libmwaw glm glew ncurses epoxy
+      librevenge libe-book libmwaw glm ncurses epoxy
       libodfgen CoinMP librdf_rasqal gnome3.adwaita-icon-theme gettext
     ]
     ++ (with gst_all_1; [ gstreamer gst-plugins-base gst-plugins-good ])

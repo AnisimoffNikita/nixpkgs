@@ -9,6 +9,7 @@
 , icu
 , wrapGAppsHook
 , gnome3
+, libportal
 , libxml2
 , libxslt
 , itstool
@@ -35,11 +36,11 @@
 
 stdenv.mkDerivation rec {
   pname = "epiphany";
-  version = "3.36.2";
+  version = "3.38.1";
 
   src = fetchurl {
-    url = "mirror://gnome/sources/epiphany/${stdenv.lib.versions.majorMinor version}/${pname}-${version}.tar.xz";
-    sha256 = "0ppvzfv98031y884cgy5agr90a0q3m37x2kybsd804g21ym7drn2";
+    url = "mirror://gnome/sources/${pname}/${stdenv.lib.versions.majorMinor version}/${pname}-${version}.tar.xz";
+    sha256 = "0hr87nl8pc7h8w65i8jwj5fdwr46wbygdnx6mhpbbyqirdm5gdsr";
   };
 
   # Tests need an X display
@@ -80,6 +81,7 @@ stdenv.mkDerivation rec {
     json-glib
     libdazzle
     libhandy
+    libportal
     libnotify
     libsecret
     libsoup

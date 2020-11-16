@@ -24,11 +24,11 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "wasabiwallet";
-  version = "1.1.11.1";
+  version = "1.1.12.2";
 
   src = fetchurl {
-    url = "https://github.com/zkSNACKs/WalletWasabi/releases/download/v${version}/WasabiLinux-${version}.tar.gz";
-    sha256 = "04v8f2h67aqvcb5a8vmzbp2sqnq7g4m0v1ng52ccb4ii668ya8hy";
+    url = "https://github.com/zkSNACKs/WalletWasabi/releases/download/v${version}/Wasabi-${version}.tar.gz";
+    sha256 = "0nl7n24nsy3gyzrxa6llx81pvsjqcwi0a4qdv34dpcq483aclp2r";
   };
 
   dontBuild = true;
@@ -40,7 +40,7 @@ stdenv.mkDerivation rec {
     desktopName = "Wasabi";
     genericName = "Bitcoin wallet";
     comment = meta.description;
-    categories = "Application;Network;Utility;";
+    categories = "Network;Utility;";
   };
 
   installPhase = ''

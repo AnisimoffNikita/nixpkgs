@@ -2,22 +2,26 @@
 
 stdenv.mkDerivation rec {
   pname = "lean";
-  version = "3.15.0";
+  version = "3.23.0";
 
   src = fetchFromGitHub {
     owner  = "leanprover-community";
     repo   = "lean";
     rev    = "v${version}";
-    sha256 = "0fl8v8n53fr5qdnabici1mj3zpmjrkssx970y3q4m48s68q665v6";
+    sha256 = "09mklc1p6ms1jayg2f89hqfmhca3h5744lli936l38ypn1d00sxx";
   };
 
   nativeBuildInputs = [ cmake ];
   buildInputs = [ gmp ];
   enableParallelBuilding = true;
 
-  preConfigure = ''
-    cd src
-  '';
+  cmakeDir = "../src";
+
+  # Running the tests is required to build the *.olean files for the core
+  # library.
+  doCheck = true;
+
+  postPatch = "patchShebangs .";
 
   postInstall = stdenv.lib.optionalString stdenv.isDarwin ''
     substituteInPlace $out/bin/leanpkg \

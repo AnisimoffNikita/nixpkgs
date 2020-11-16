@@ -63,6 +63,14 @@ in
       '';
     };
 
+    firmwarePartitionName = mkOption {
+      type = types.str;
+      default = "FIRMWARE";
+      description = ''
+        Name of the filesystem which holds the boot firmware.
+      '';
+    };
+
     rootPartitionUUID = mkOption {
       type = types.nullOr types.str;
       default = null;
@@ -91,12 +99,21 @@ in
     };
 
     populateRootCommands = mkOption {
-      example = literalExample "''\${extlinux-conf-builder} -t 3 -c \${config.system.build.toplevel} -d ./files/boot''";
+      example = literalExample "''\${config.boot.loader.generic-extlinux-compatible.populateCmd} -c \${config.system.build.toplevel} -d ./files/boot''";
       description = ''
         Shell commands to populate the ./files directory.
         All files in that directory are copied to the
         root (/) partition on the SD image. Use this to
         populate the ./files/boot (/boot) directory.
+      '';
+    };
+
+    postBuildCommands = mkOption {
+      example = literalExample "'' dd if=\${pkgs.myBootLoader}/SPL of=$img bs=1024 seek=1 conv=notrunc ''";
+      default = "";
+      description = ''
+        Shell commands to run after the image is built.
+        Can be used for boards requiring to dd u-boot SPL before actual partitions.
       '';
     };
 
@@ -114,7 +131,7 @@ in
   config = {
     fileSystems = {
       "/boot/firmware" = {
-        device = "/dev/disk/by-label/FIRMWARE";
+        device = "/dev/disk/by-label/${config.sdImage.firmwarePartitionName}";
         fsType = "vfat";
         # Alternatively, this could be removed from the configuration.
         # The filesystem is not needed at runtime, it could be treated
@@ -178,7 +195,7 @@ in
         # Create a FAT32 /boot/firmware partition of suitable size into firmware_part.img
         eval $(partx $img -o START,SECTORS --nr 1 --pairs)
         truncate -s $((SECTORS * 512)) firmware_part.img
-        faketime "1970-01-01 00:00:00" mkfs.vfat -i ${config.sdImage.firmwarePartitionID} -n FIRMWARE firmware_part.img
+        faketime "1970-01-01 00:00:00" mkfs.vfat -i ${config.sdImage.firmwarePartitionID} -n ${config.sdImage.firmwarePartitionName} firmware_part.img
 
         # Populate the files intended for /boot/firmware
         mkdir firmware
@@ -189,8 +206,11 @@ in
         # Verify the FAT partition before copying it.
         fsck.vfat -vn firmware_part.img
         dd conv=notrunc if=firmware_part.img of=$img seek=$START count=$SECTORS
+
+        ${config.sdImage.postBuildCommands}
+
         if test -n "$compressImage"; then
-            zstd -T$NIX_BUILD_CORES $img
+            zstd -T$NIX_BUILD_CORES --rm $img
         fi
       '';
     }) {};

@@ -61,6 +61,11 @@ stdenv.mkDerivation rec {
       ++ lib.optional zeroconfSupport  avahi
   );
 
+  prePatch = ''
+    substituteInPlace bootstrap.sh \
+      --replace pkg-config $PKG_CONFIG
+  '';
+
   autoreconfPhase = ''
     # Performs an autoreconf
     patchShebangs bootstrap.sh
@@ -118,6 +123,10 @@ stdenv.mkDerivation rec {
      --prefix XDG_DATA_DIRS : "$out/share/gsettings-schemas/${name}" \
      --prefix GIO_EXTRA_MODULES : "${lib.getLib dconf}/lib/gio/modules"
   '';
+
+  passthru = {
+    pulseDir = "lib/pulse-" + lib.versions.majorMinor version;
+  };
 
   meta = {
     description = "Sound server for POSIX and Win32 systems";

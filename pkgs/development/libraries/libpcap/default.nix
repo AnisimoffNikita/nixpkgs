@@ -15,7 +15,7 @@ stdenv.mkDerivation rec {
     ++ optionals withBluez [ bluez.dev pkgconfig ];
 
   # We need to force the autodetection because detection doesn't
-  # work in pure build enviroments.
+  # work in pure build environments.
   configureFlags = [
     ("--with-pcap=" + {
       linux = "linux";
@@ -24,10 +24,14 @@ stdenv.mkDerivation rec {
   ] ++ optionals (stdenv.hostPlatform == stdenv.buildPlatform)
     [ "ac_cv_linux_vers=2" ];
 
-  dontStrip = stdenv.hostPlatform != stdenv.buildPlatform;
-
   prePatch = optionalString stdenv.isDarwin ''
     substituteInPlace configure --replace " -arch i386" ""
+  '';
+
+  postInstall = ''
+    if [ "$dontDisableStatic" -ne "1" ]; then
+      rm -f $out/lib/libpcap.a
+    fi
   '';
 
   meta = {

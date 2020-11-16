@@ -2,16 +2,18 @@
 
 buildGoModule rec {
   pname = "mutagen";
-  version = "0.11.5";
+  version = "0.11.8";
 
   src = fetchFromGitHub {
     owner = "mutagen-io";
     repo = pname;
     rev = "v${version}";
-    sha256 = "0z2bf412zfap91ygp7v06vif87d1cxj2jlc0jvfv7fm61801piij";
+    sha256 = "17ycd2y7hgwa2yxbin86i6aj67x7xaajwz3mqgdyfvkja5hgbjyr";
   };
 
   vendorSha256 = "0szs9yc49fyh55ra1wf8zj76kdah0x49d45cgivk3gqh2hl17j6l";
+
+  doCheck = false;
 
   subPackages = [ "cmd/mutagen" "cmd/mutagen-agent" ];
 

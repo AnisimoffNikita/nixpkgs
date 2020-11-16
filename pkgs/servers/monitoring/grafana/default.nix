@@ -1,8 +1,8 @@
-{ lib, buildGoModule, fetchurl, fetchFromGitHub }:
+{ lib, buildGoModule, fetchurl, fetchFromGitHub, nixosTests }:
 
 buildGoModule rec {
   pname = "grafana";
-  version = "7.0.3";
+  version = "7.3.2";
 
   excludedPackages = [ "release_publisher" ];
 
@@ -10,19 +10,25 @@ buildGoModule rec {
     rev = "v${version}";
     owner = "grafana";
     repo = "grafana";
-    sha256 = "1s5hq7icfnaiq7msk7vdz30wdhw13s115vg8ws7gqv5sl1hi0vlg";
+    sha256 = "0lknymp203bgrwq8g05pk07p385k2hh9wap4ql4lxylsn89szs65";
   };
 
   srcStatic = fetchurl {
     url = "https://dl.grafana.com/oss/release/grafana-${version}.linux-amd64.tar.gz";
-    sha256 = "1wk991nvm6a18mah37dh0sdi72gdshpzdi367v7fpz2b9vd65b4g";
+    sha256 = "08smddc86jm3ign1pb1arw1zqkh72dbddizzn1bqg4lanx2xwjca";
   };
 
-  vendorSha256 = "00xvpxhnvxdf030978paywl794mlmgqzd94b64hh67946acnbjcl";
+  vendorSha256 = "09rb96fm7ij16r843lbwcxb26vmjyahs1bi5pnnqz0mnm0vvmsjb";
 
   postPatch = ''
     substituteInPlace pkg/cmd/grafana-server/main.go \
       --replace 'var version = "5.0.0"'  'var version = "${version}"'
+  '';
+
+  # fixes build failure with go 1.15:
+  # main module (github.com/grafana/grafana) does not contain package github.com/grafana/grafana/scripts/go
+  preBuild = ''
+    rm -rf scripts/go
   '';
 
   postInstall = ''
@@ -30,6 +36,8 @@ buildGoModule rec {
     mkdir -p $out/share/grafana
     mv grafana-*/{public,conf,tools} $out/share/grafana/
   '';
+
+  passthru.tests = { inherit (nixosTests) grafana; };
 
   meta = with lib; {
     description = "Gorgeous metric viz, dashboards & editors for Graphite, InfluxDB & OpenTSDB";

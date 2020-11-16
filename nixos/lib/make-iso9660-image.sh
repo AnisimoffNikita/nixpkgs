@@ -99,7 +99,12 @@ done
 
 mkdir -p $out/iso
 
+# daed2280-b91e-42c0-aed6-82c825ca41f3 is an arbitrary namespace, to prevent
+# independent applications from generating the same UUID for the same value.
+# (the chance of that being problematic seem pretty slim here, but that's how
+# version-5 UUID's work)
 xorriso="xorriso
+ -boot_image any gpt_disk_guid=$(uuid -v 5 daed2280-b91e-42c0-aed6-82c825ca41f3 $out | tr -d -)
  -as mkisofs
  -iso-level 3
  -volid ${volumeID}
@@ -118,18 +123,9 @@ xorriso="xorriso
 
 $xorriso -output $out/iso/$isoName
 
-if test -n "$usbBootable"; then
-    echo "Making image hybrid..."
-    if test -n "$efiBootable"; then
-        isohybrid --uefi $out/iso/$isoName
-    else
-        isohybrid $out/iso/$isoName
-    fi
-fi
-
 if test -n "$compressImage"; then
     echo "Compressing image..."
-    zstd -T$NIX_BUILD_CORES $out/iso/$isoName
+    zstd -T$NIX_BUILD_CORES --rm $out/iso/$isoName
 fi
 
 mkdir -p $out/nix-support

@@ -41,11 +41,19 @@ stdenv.mkDerivation {
     "-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY"
   ] ++ stdenv.lib.optionals (bareMetal) [
     "-DCOMPILER_RT_OS_DIR=baremetal"
+  ] ++ stdenv.lib.optionals (stdenv.hostPlatform.isDarwin) [
+    # The compiler-rt build infrastructure sniffs supported platforms on Darwin
+    # and finds i386;x86_64;x86_64h. We only build for x86_64, so linking fails
+    # when it tries to use libc++ and libc++api for i386.
+    "-DDARWIN_osx_ARCHS=${stdenv.hostPlatform.parsed.cpu.name}"
   ];
 
   outputs = [ "out" "dev" ];
 
   patches = [
+    # https://github.com/llvm/llvm-project/commit/947f9692440836dcb8d88b74b69dd379d85974ce
+    ./compiler-rt-glibc.patch
+
     ./compiler-rt-codesign.patch # Revert compiler-rt commit that makes codesign mandatory
   ] ++ stdenv.lib.optional (useLLVM) ./crtbegin-and-end.patch
     ++ stdenv.lib.optional stdenv.hostPlatform.isMusl ./sanitizers-nongnu.patch

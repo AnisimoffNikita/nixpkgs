@@ -1,7 +1,7 @@
 { stdenv, lib, fetchurl, callPackage, substituteAll, python3, pkgconfig, writeText
 , xorg, gtk3, glib, pango, cairo, gdk-pixbuf, atk
 , wrapGAppsHook, xorgserver, getopt, xauth, utillinux, which
-, ffmpeg_4, x264, libvpx, libwebp, x265
+, ffmpeg, x264, libvpx, libwebp, x265
 , libfakeXinerama
 , gst_all_1, pulseaudio, gobject-introspection
 , pam }:
@@ -60,7 +60,7 @@ in buildPythonApplication rec {
 
     pango cairo gdk-pixbuf atk.out gtk3 glib
 
-    ffmpeg_4 libvpx x264 libwebp x265
+    ffmpeg libvpx x264 libwebp x265
 
     gst_all_1.gstreamer
     gst_all_1.gst-plugins-base
@@ -90,9 +90,12 @@ in buildPythonApplication rec {
     "--with-vsock"
   ];
 
+  dontWrapGApps = true;
   preFixup = ''
-    gappsWrapperArgs+=(
+    makeWrapperArgs+=(
+      "''${gappsWrapperArgs[@]}"
       --set XPRA_INSTALL_PREFIX "$out"
+      --set XPRA_COMMAND "$out/bin/xpra"
       --prefix LD_LIBRARY_PATH : ${libfakeXinerama}/lib
       --prefix PATH : ${stdenv.lib.makeBinPath [ getopt xorgserver xauth which utillinux pulseaudio ]}
     )
